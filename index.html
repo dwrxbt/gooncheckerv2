@@ -14,7 +14,7 @@ body {
   margin: 0;
   background: #111;
   color: #fff;
-  font-family: Arial, sans-serif;
+  font-family: "fontcum";
   height: 100vh;
   overflow: hidden;
 }
@@ -34,6 +34,7 @@ button {
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  font-family: "fontcum";
 }
 
 .scanner {
@@ -67,8 +68,8 @@ button {
 }
 
 @keyframes erupt {
-  0%   { height: 100%; }
-  40%  { height: 130%; }
+  0% { height: 100%; }
+  40% { height: 130%; }
   100% {
     height: 0%;
     transform: translateY(-120px);
@@ -77,14 +78,13 @@ button {
 }
 
 .status {
-  font-size: 16px;
+  font-size: 18px;
   opacity: 0.85;
-  min-height: 24px;
   text-align: center;
   max-width: 260px;
 }
 
-/* CARD MODAL */
+/* RESULT MODAL */
 .card-modal {
   position: fixed;
   inset: 0;
@@ -107,6 +107,16 @@ button {
   border-radius: 12px;
 }
 
+.result-text {
+  margin-top: 12px;
+  font-size: 28px;
+}
+
+.result-tier {
+  font-size: 22px;
+  opacity: 0.85;
+}
+
 .card-buttons {
   display: flex;
   gap: 12px;
@@ -115,6 +125,11 @@ button {
 
 .card-buttons button {
   flex: 1;
+}
+
+/* CANVAS */
+canvas {
+  display: none;
 }
 </style>
 </head>
@@ -135,6 +150,8 @@ button {
 <div class="card-modal" id="cardModal">
   <div class="card">
     <img id="cardImage" />
+    <div class="result-text" id="uiPercent">0% GOONER</div>
+    <div class="result-tier" id="uiTier">YOUR TIER: —</div>
     <div class="card-buttons">
       <button onclick="saveCard()">Save card</button>
       <button onclick="location.reload()">Run again</button>
@@ -142,8 +159,7 @@ button {
   </div>
 </div>
 
-<!-- ВАЖНО: увеличенная высота -->
-<canvas id="canvas" width="1024" height="1300" style="display:none;"></canvas>
+<canvas id="canvas" width="1024" height="1300"></canvas>
 
 <script>
 const statuses = [
@@ -174,13 +190,13 @@ const tiers = [
   [100,100,"Telcier"]
 ];
 
+let finalPercent = 0;
+let finalTier = "";
+
 const start = document.getElementById("start");
 const scanner = document.getElementById("scanner");
 const fill = document.getElementById("fill");
 const statusEl = document.getElementById("status");
-
-let finalPercent = 0;
-let finalTier = "";
 
 start.onclick = () => {
   start.style.display = "none";
@@ -213,10 +229,21 @@ function showResult() {
   finalPercent = Math.floor(Math.random() * 101);
   finalTier = tiers.find(t => finalPercent >= t[0] && finalPercent <= t[1])[2];
 
-  document.getElementById("cardImage").src =
-    `images/${finalTier}.jpg`;
+  document.getElementById("cardImage").src = `images/${finalTier}.jpg`;
+  document.getElementById("uiPercent").innerText = `${finalPercent}% GOONER`;
+  document.getElementById("uiTier").innerText = `YOUR TIER: ${finalTier}`;
 
   document.getElementById("cardModal").style.display = "flex";
+}
+
+/* COVER DRAW */
+function drawCover(ctx, img, x, y, w, h) {
+  const r = Math.max(w / img.width, h / img.height);
+  const nw = img.width * r;
+  const nh = img.height * r;
+  const nx = x + (w - nw) / 2;
+  const ny = y + (h - nh) / 2;
+  ctx.drawImage(img, nx, ny, nw, nh);
 }
 
 function saveCard() {
@@ -228,46 +255,29 @@ function saveCard() {
     const W = canvas.width;
     const H = canvas.height;
 
-    // BACKGROUND
     ctx.fillStyle = "#0a0a0a";
     ctx.fillRect(0, 0, W, H);
 
-    // BORDER
     ctx.strokeStyle = "#e6d3a3";
     ctx.lineWidth = 12;
     ctx.strokeRect(6, 6, W - 12, H - 12);
 
-    // IMAGE
-    ctx.drawImage(img, 0, 0, W, W);
+    drawCover(ctx, img, 0, 0, W, W);
 
-    // DIVIDER
     ctx.fillStyle = "#e6d3a3";
     ctx.fillRect(0, W, W, 6);
 
-    // TEXT AREA BG
     ctx.fillStyle = "#000";
     ctx.fillRect(0, W + 6, W, H - W);
 
-    // MAIN TEXT
     ctx.font = "110px fontcum";
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = "#fff";
     ctx.textAlign = "center";
-    ctx.fillText(
-      `${finalPercent}% GOONER`,
-      W / 2,
-      W + 140
-    );
+    ctx.fillText(`${finalPercent}% GOONER`, W / 2, W + 140);
 
-    // SUBTEXT
-    ctx.font = "42px Arial";
-    ctx.fillStyle = "#bbbbbb";
-    ctx.fillText(
-      `TIER: ${finalTier}`,
-      W / 2,
-      W + 210
-    );
+    ctx.font = "48px fontcum";
+    ctx.fillText(`TIER: ${finalTier}`, W / 2, W + 220);
 
-    // SAVE
     const link = document.createElement("a");
     link.download = `${finalPercent}-gooner-${finalTier}.jpg`;
     link.href = canvas.toDataURL("image/jpeg", 0.92);
