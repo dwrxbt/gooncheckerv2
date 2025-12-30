@@ -7,7 +7,7 @@
 <style>
 @font-face {
   font-family: "fontcum";
-  src: url("fonts/fontcum.ttf") format("truetype");
+  src: url("fonts/fontcum.otf") format("opentype");
 }
 
 body {
@@ -149,11 +149,11 @@ button {
   </div>
 </div>
 
-<canvas id="canvas" width="2048" height="2048" style="display:none;"></canvas>
+<canvas id="canvas" width="1024" height="1024" style="display:none;"></canvas>
 
 <script>
 const statusesBase = [
-  "Touching your balls",
+  "Touching the spheres",
   "Massaging the neck",
   "Reading forbidden thoughts",
   "Analyzing browser history",
@@ -166,18 +166,18 @@ const statusesBase = [
 ];
 
 const tiers = [
-  [0,0,"Wale.moca"],
-  [1,10,"Banditxbt"],
-  [11,20,"Oatmilk"],
-  [21,30,"Andraz"],
-  [31,40,"Hribi"],
-  [41,50,"Atns"],
+  [0,0,"wale.moca"],
+  [1,10,"banditxbt"],
+  [11,20,"oatmilk"],
+  [21,30,"andraz"],
+  [31,40,"Heibi"],
+  [41,50,"atns"],
   [51,60,"Taiyo"],
   [61,70,"Ethereal"],
-  [71,80,"Cryptopunk"],
-  [81,90,"Alyx"],
-  [91,99,"Foxy"],
-  [100,100,"Telcier"]
+  [71,80,"cryptopunk"],
+  [81,90,"alyx"],
+  [91,99,"foxy"],
+  [100,100,"telcier"]
 ];
 
 const start = document.getElementById("start");
@@ -219,7 +219,7 @@ function showResult() {
   const tier = tiers.find(t => percent >= t[0] && percent <= t[1])[2];
 
   document.getElementById("cardImage").src =
-    `images/${tier}.png`;
+    `images/${tier}.jpg`;
   document.getElementById("cardText").innerText =
     `${percent}% GOONER`;
 
@@ -232,21 +232,21 @@ function saveCard() {
   const ctx = canvas.getContext("2d");
   const img = document.getElementById("cardImage");
 
-  ctx.clearRect(0,0,2048,2048);
-  ctx.drawImage(img, 0, 0, 2048, 2048);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-  ctx.font = "140px fontcum";
+  ctx.font = "120px fontcum";
   ctx.fillStyle = "white";
   ctx.textAlign = "center";
   ctx.fillText(
     document.getElementById("cardText").innerText,
-    1024,
-    1850
+    canvas.width / 2,
+    canvas.height - 120
   );
 
   const link = document.createElement("a");
-  link.download = "gooner-card.png";
-  link.href = canvas.toDataURL("image/png");
+  link.download = "gooner-card.jpg";
+  link.href = canvas.toDataURL("image/jpeg", 0.9);
   link.click();
 }
 </script>
