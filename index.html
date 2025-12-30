@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
 <title>Gooner Scanner</title>
 
 <style>
@@ -84,12 +84,12 @@ button {
   max-width: 260px;
 }
 
-/* RESULT CARD */
+/* CARD MODAL */
 .card-modal {
   position: fixed;
   inset: 0;
   display: none;
-  background: rgba(0,0,0,0.8);
+  background: rgba(0,0,0,0.85);
   align-items: center;
   justify-content: center;
 }
@@ -97,7 +97,7 @@ button {
 .card {
   background: #000;
   padding: 16px;
-  border-radius: 16px;
+  border-radius: 18px;
   width: 320px;
   text-align: center;
 }
@@ -105,12 +105,6 @@ button {
 .card img {
   width: 100%;
   border-radius: 12px;
-}
-
-.card-text {
-  margin-top: 12px;
-  font-family: "fontcum";
-  font-size: 36px;
 }
 
 .card-buttons {
@@ -141,7 +135,6 @@ button {
 <div class="card-modal" id="cardModal">
   <div class="card">
     <img id="cardImage" />
-    <div class="card-text" id="cardText">0% GOONER</div>
     <div class="card-buttons">
       <button onclick="saveCard()">Save card</button>
       <button onclick="location.reload()">Run again</button>
@@ -149,11 +142,12 @@ button {
   </div>
 </div>
 
-<canvas id="canvas" width="1024" height="1024" style="display:none;"></canvas>
+<!-- ВАЖНО: увеличенная высота -->
+<canvas id="canvas" width="1024" height="1300" style="display:none;"></canvas>
 
 <script>
-const statusesBase = [
-  "Touching the spheres",
+const statuses = [
+  "Touching your balls",
   "Massaging the neck",
   "Reading forbidden thoughts",
   "Analyzing browser history",
@@ -166,18 +160,18 @@ const statusesBase = [
 ];
 
 const tiers = [
-  [0,0,"wale.moca"],
-  [1,10,"banditxbt"],
-  [11,20,"oatmilk"],
-  [21,30,"andraz"],
-  [31,40,"Heibi"],
-  [41,50,"atns"],
+  [0,0,"Wale.moca"],
+  [1,10,"Banditxbt"],
+  [11,20,"Oatmilk"],
+  [21,30,"Andraz"],
+  [31,40,"Hribi"],
+  [41,50,"Atns"],
   [51,60,"Taiyo"],
   [61,70,"Ethereal"],
-  [71,80,"cryptopunk"],
-  [81,90,"alyx"],
-  [91,99,"foxy"],
-  [100,100,"telcier"]
+  [71,80,"Cryptopunk"],
+  [81,90,"Alyx"],
+  [91,99,"Foxy"],
+  [100,100,"Telcier"]
 ];
 
 const start = document.getElementById("start");
@@ -185,20 +179,21 @@ const scanner = document.getElementById("scanner");
 const fill = document.getElementById("fill");
 const statusEl = document.getElementById("status");
 
+let finalPercent = 0;
+let finalTier = "";
+
 start.onclick = () => {
   start.style.display = "none";
   scanner.style.display = "flex";
 
   let progress = 0;
-  const statuses = [...statusesBase].sort(() => Math.random() - 0.5);
-  let statusIndex = 0;
+  const shuffled = [...statuses].sort(() => Math.random() - 0.5);
+  let i = 0;
 
-  statusEl.innerText = statuses[statusIndex++];
+  statusEl.innerText = shuffled[i++];
 
   const statusTimer = setInterval(() => {
-    if (statusIndex < statuses.length) {
-      statusEl.innerText = statuses[statusIndex++];
-    }
+    if (i < shuffled.length) statusEl.innerText = shuffled[i++];
   }, 3000);
 
   const progressTimer = setInterval(() => {
@@ -215,18 +210,15 @@ start.onclick = () => {
 };
 
 function showResult() {
-  const percent = Math.floor(Math.random() * 101);
-  const tier = tiers.find(t => percent >= t[0] && percent <= t[1])[2];
+  finalPercent = Math.floor(Math.random() * 101);
+  finalTier = tiers.find(t => finalPercent >= t[0] && finalPercent <= t[1])[2];
 
   document.getElementById("cardImage").src =
-    `images/${tier}.jpg`;
-  document.getElementById("cardText").innerText =
-    `${percent}% GOONER`;
+    `images/${finalTier}.jpg`;
 
   document.getElementById("cardModal").style.display = "flex";
 }
 
-/* SAVE CARD */
 function saveCard() {
   document.fonts.ready.then(() => {
     const canvas = document.getElementById("canvas");
@@ -236,48 +228,48 @@ function saveCard() {
     const W = canvas.width;
     const H = canvas.height;
 
-    // background
+    // BACKGROUND
     ctx.fillStyle = "#0a0a0a";
     ctx.fillRect(0, 0, W, H);
 
-    // card border
+    // BORDER
     ctx.strokeStyle = "#e6d3a3";
     ctx.lineWidth = 12;
     ctx.strokeRect(6, 6, W - 12, H - 12);
 
-    // image area
+    // IMAGE
     ctx.drawImage(img, 0, 0, W, W);
 
-    // divider
+    // DIVIDER
     ctx.fillStyle = "#e6d3a3";
     ctx.fillRect(0, W, W, 6);
 
-    // text area background
+    // TEXT AREA BG
     ctx.fillStyle = "#000";
     ctx.fillRect(0, W + 6, W, H - W);
 
-    // main text
+    // MAIN TEXT
     ctx.font = "110px fontcum";
     ctx.fillStyle = "#ffffff";
     ctx.textAlign = "center";
     ctx.fillText(
-      document.getElementById("cardText").innerText,
+      `${finalPercent}% GOONER`,
       W / 2,
       W + 140
     );
 
-    // tier subtitle
+    // SUBTEXT
     ctx.font = "42px Arial";
     ctx.fillStyle = "#bbbbbb";
     ctx.fillText(
-      "GOONER TIER",
+      `TIER: ${finalTier}`,
       W / 2,
       W + 210
     );
 
-    // save
+    // SAVE
     const link = document.createElement("a");
-    link.download = "gooner-card.jpg";
+    link.download = `${finalPercent}-gooner-${finalTier}.jpg`;
     link.href = canvas.toDataURL("image/jpeg", 0.92);
     link.click();
   });
