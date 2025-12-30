@@ -228,26 +228,59 @@ function showResult() {
 
 /* SAVE CARD */
 function saveCard() {
-  const canvas = document.getElementById("canvas");
-  const ctx = canvas.getContext("2d");
-  const img = document.getElementById("cardImage");
+  document.fonts.ready.then(() => {
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const img = document.getElementById("cardImage");
 
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    const W = canvas.width;
+    const H = canvas.height;
 
-  ctx.font = "120px fontcum";
-  ctx.fillStyle = "white";
-  ctx.textAlign = "center";
-  ctx.fillText(
-    document.getElementById("cardText").innerText,
-    canvas.width / 2,
-    canvas.height - 120
-  );
+    // background
+    ctx.fillStyle = "#0a0a0a";
+    ctx.fillRect(0, 0, W, H);
 
-  const link = document.createElement("a");
-  link.download = "gooner-card.jpg";
-  link.href = canvas.toDataURL("image/jpeg", 0.9);
-  link.click();
+    // card border
+    ctx.strokeStyle = "#e6d3a3";
+    ctx.lineWidth = 12;
+    ctx.strokeRect(6, 6, W - 12, H - 12);
+
+    // image area
+    ctx.drawImage(img, 0, 0, W, W);
+
+    // divider
+    ctx.fillStyle = "#e6d3a3";
+    ctx.fillRect(0, W, W, 6);
+
+    // text area background
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, W + 6, W, H - W);
+
+    // main text
+    ctx.font = "110px fontcum";
+    ctx.fillStyle = "#ffffff";
+    ctx.textAlign = "center";
+    ctx.fillText(
+      document.getElementById("cardText").innerText,
+      W / 2,
+      W + 140
+    );
+
+    // tier subtitle
+    ctx.font = "42px Arial";
+    ctx.fillStyle = "#bbbbbb";
+    ctx.fillText(
+      "GOONER TIER",
+      W / 2,
+      W + 210
+    );
+
+    // save
+    const link = document.createElement("a");
+    link.download = "gooner-card.jpg";
+    link.href = canvas.toDataURL("image/jpeg", 0.92);
+    link.click();
+  });
 }
 </script>
 
