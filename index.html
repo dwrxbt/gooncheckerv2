@@ -5,6 +5,11 @@
 <title>Gooner Scanner</title>
 
 <style>
+@font-face {
+  font-family: "fontcum";
+  src: url("fonts/fontcum.ttf") format("truetype");
+}
+
 body {
   margin: 0;
   background: #111;
@@ -57,7 +62,6 @@ button {
   transition: height 0.15s linear;
 }
 
-/* ERUPTION */
 .fill.erupt {
   animation: erupt 0.8s cubic-bezier(.2,.8,.3,1) forwards;
 }
@@ -72,65 +76,51 @@ button {
   }
 }
 
-/* STATUS TEXT */
 .status {
   font-size: 16px;
   opacity: 0.85;
   min-height: 24px;
-  animation: fadeIn 0.4s ease;
   text-align: center;
   max-width: 260px;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 0.85; transform: translateY(0); }
-}
-
-/* BLUR */
-.blur {
-  filter: blur(8px);
-}
-
-/* MODAL */
-.modal {
+/* RESULT CARD */
+.card-modal {
   position: fixed;
   inset: 0;
   display: none;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0,0,0,0.8);
   align-items: center;
   justify-content: center;
 }
 
-.modal-content {
-  background: #1a1a1a;
-  padding: 36px;
-  border-radius: 20px;
-  width: 340px;
+.card {
+  background: #000;
+  padding: 16px;
+  border-radius: 16px;
+  width: 320px;
   text-align: center;
 }
 
-.percent {
-  font-size: 46px;
-  margin-bottom: 10px;
+.card img {
+  width: 100%;
+  border-radius: 12px;
 }
 
-.tier-label {
-  opacity: 0.5;
-  margin-bottom: 4px;
+.card-text {
+  margin-top: 12px;
+  font-family: "fontcum";
+  font-size: 36px;
 }
 
-.tier-name {
-  font-size: 26px;
-  font-weight: 900;
-  letter-spacing: 1px;
-  margin-bottom: 24px;
+.card-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
 }
 
-.share {
-  background: #000;
-  color: #fff;
-  border: 1px solid #333;
+.card-buttons button {
+  flex: 1;
 }
 </style>
 </head>
@@ -148,19 +138,22 @@ button {
   </div>
 </div>
 
-<div class="modal" id="modal">
-  <div class="modal-content">
-    <div class="percent" id="percent">0% GOONER</div>
-    <div class="tier-label">YOUR TIER</div>
-    <div class="tier-name" id="tier">—</div>
-    <button class="share">Share on X (image soon)</button>
+<div class="card-modal" id="cardModal">
+  <div class="card">
+    <img id="cardImage" />
+    <div class="card-text" id="cardText">0% GOONER</div>
+    <div class="card-buttons">
+      <button onclick="saveCard()">Save card</button>
+      <button onclick="location.reload()">Run again</button>
+    </div>
   </div>
 </div>
 
+<canvas id="canvas" width="2048" height="2048" style="display:none;"></canvas>
+
 <script>
-/* STATUS MESSAGES */
-const baseStatuses = [
-  "Touching the spheres",
+const statusesBase = [
+  "Touching your balls",
   "Massaging the neck",
   "Reading forbidden thoughts",
   "Analyzing browser history",
@@ -172,56 +165,40 @@ const baseStatuses = [
   "Running goon heuristics"
 ];
 
-/* TIERS */
 const tiers = [
-  [0,0,"wale.moca"],
-  [1,10,"banditxbt"],
-  [11,20,"oatmilk"],
-  [21,30,"andraz"],
-  [31,40,"Heibi"],
-  [41,50,"atns"],
+  [0,0,"Wale.moca"],
+  [1,10,"Banditxbt"],
+  [11,20,"Oatmilk"],
+  [21,30,"Andraz"],
+  [31,40,"Hribi"],
+  [41,50,"Atns"],
   [51,60,"Taiyo"],
   [61,70,"Ethereal"],
-  [71,80,"cryptopunk"],
-  [81,90,"alyx"],
-  [91,99,"foxy"],
-  [100,100,"telcier"]
+  [71,80,"Cryptopunk"],
+  [81,90,"Alyx"],
+  [91,99,"Foxy"],
+  [100,100,"Telcier"]
 ];
 
 const start = document.getElementById("start");
 const scanner = document.getElementById("scanner");
 const fill = document.getElementById("fill");
 const statusEl = document.getElementById("status");
-const modal = document.getElementById("modal");
-const app = document.getElementById("app");
-
-/* Shuffle helper */
-function shuffle(array) {
-  return array
-    .map(v => ({ v, sort: Math.random() }))
-    .sort((a,b) => a.sort - b.sort)
-    .map(({ v }) => v);
-}
 
 start.onclick = () => {
   start.style.display = "none";
   scanner.style.display = "flex";
 
   let progress = 0;
-
-  // prepare non-repeating statuses
-  const statuses = shuffle([...baseStatuses]);
+  const statuses = [...statusesBase].sort(() => Math.random() - 0.5);
   let statusIndex = 0;
 
   statusEl.innerText = statuses[statusIndex++];
 
   const statusTimer = setInterval(() => {
-    if (statusIndex >= statuses.length) return;
-
-    statusEl.innerText = statuses[statusIndex++];
-    statusEl.style.animation = "none";
-    statusEl.offsetHeight; // force reflow
-    statusEl.style.animation = "";
+    if (statusIndex < statuses.length) {
+      statusEl.innerText = statuses[statusIndex++];
+    }
   }, 3000);
 
   const progressTimer = setInterval(() => {
@@ -231,7 +208,6 @@ start.onclick = () => {
     if (progress >= 100) {
       clearInterval(progressTimer);
       clearInterval(statusTimer);
-
       fill.classList.add("erupt");
       setTimeout(showResult, 800);
     }
@@ -239,14 +215,39 @@ start.onclick = () => {
 };
 
 function showResult() {
-  const value = Math.floor(Math.random() * 101);
-  const tier = tiers.find(t => value >= t[0] && value <= t[1])[2];
+  const percent = Math.floor(Math.random() * 101);
+  const tier = tiers.find(t => percent >= t[0] && percent <= t[1])[2];
 
-  document.getElementById("percent").innerText = value + "% GOONER";
-  document.getElementById("tier").innerText = tier;
+  document.getElementById("cardImage").src =
+    `images/${tier}.png`;
+  document.getElementById("cardText").innerText =
+    `${percent}% GOONER`;
 
-  app.classList.add("blur");
-  modal.style.display = "flex";
+  document.getElementById("cardModal").style.display = "flex";
+}
+
+/* SAVE CARD */
+function saveCard() {
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+  const img = document.getElementById("cardImage");
+
+  ctx.clearRect(0,0,2048,2048);
+  ctx.drawImage(img, 0, 0, 2048, 2048);
+
+  ctx.font = "140px fontcum";
+  ctx.fillStyle = "white";
+  ctx.textAlign = "center";
+  ctx.fillText(
+    document.getElementById("cardText").innerText,
+    1024,
+    1850
+  );
+
+  const link = document.createElement("a");
+  link.download = "gooner-card.png";
+  link.href = canvas.toDataURL("image/png");
+  link.click();
 }
 </script>
 
