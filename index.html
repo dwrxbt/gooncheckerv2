@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <title>Gooner Test</title>
+
 <style>
   body {
     margin: 0;
@@ -19,10 +20,11 @@
     align-items: center;
     justify-content: center;
     flex-direction: column;
+    gap: 20px;
   }
 
   button {
-    padding: 14px 28px;
+    padding: 14px 30px;
     font-size: 18px;
     background: #e6d3a3;
     border: none;
@@ -30,7 +32,7 @@
     cursor: pointer;
   }
 
-  /* Loader */
+  /* Scanner */
   .scanner {
     display: none;
     flex-direction: column;
@@ -39,10 +41,10 @@
   }
 
   .bar {
-    width: 40px;
-    height: 300px;
+    width: 42px;
+    height: 320px;
     background: #e6d3a3;
-    border-radius: 20px;
+    border-radius: 24px;
     overflow: hidden;
     position: relative;
   }
@@ -53,12 +55,32 @@
     width: 100%;
     height: 0%;
     background: #fff;
-    transition: height 1s linear;
+    transition: height 0.2s linear;
+  }
+
+  .fill.erupt {
+    animation: erupt 0.6s ease-out forwards;
+  }
+
+  @keyframes erupt {
+    0% {
+      transform: scaleY(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scaleY(1.4) translateY(-15px);
+    }
+    100% {
+      transform: scaleY(0);
+      opacity: 0;
+    }
   }
 
   .status {
-    font-size: 16px;
+    font-size: 15px;
     opacity: 0.8;
+    text-align: center;
+    max-width: 260px;
   }
 
   /* Blur */
@@ -71,27 +93,33 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.6);
+    background: rgba(0,0,0,0.65);
     align-items: center;
     justify-content: center;
   }
 
   .modal-content {
     background: #1a1a1a;
-    padding: 30px;
-    border-radius: 16px;
+    padding: 32px;
+    border-radius: 18px;
     text-align: center;
     width: 320px;
   }
 
   .percent {
-    font-size: 42px;
+    font-size: 44px;
     margin-bottom: 10px;
   }
 
-  .tier {
-    opacity: 0.7;
-    margin-bottom: 20px;
+  .tier-label {
+    opacity: 0.6;
+    margin-bottom: 6px;
+  }
+
+  .tier-name {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 22px;
   }
 
   .share {
@@ -101,6 +129,7 @@
   }
 </style>
 </head>
+
 <body>
 
 <div id="app" class="center">
@@ -116,15 +145,16 @@
 
 <div class="modal" id="modal">
   <div class="modal-content">
-    <div class="percent" id="resultPercent">0%</div>
-    <div class="tier" id="resultTier"></div>
+    <div class="percent" id="resultPercent">0% GOONER</div>
+    <div class="tier-label">YOUR TIER</div>
+    <div class="tier-name" id="resultTier">—</div>
     <button class="share">Share on X (image soon)</button>
   </div>
 </div>
 
 <script>
 const statuses = [
-  "Touching the spheres",
+  "Touching your balls",
   "Massaging the neck",
   "Reading forbidden thoughts",
   "Calibrating instincts",
@@ -141,15 +171,15 @@ const statuses = [
 const tiers = [
   { min: 0, max: 0, name: "wale.moca" },
   { min: 1, max: 10, name: "banditxbt" },
-  { min: 10, max: 20, name: "oatmilk" },
-  { min: 20, max: 30, name: "andraz" },
-  { min: 30, max: 40, name: "Heibi" },
-  { min: 40, max: 50, name: "atns" },
-  { min: 50, max: 60, name: "Taiyo" },
-  { min: 60, max: 70, name: "Ethereal" },
-  { min: 70, max: 80, name: "cryptopunk" },
-  { min: 80, max: 90, name: "alyx" },
-  { min: 90, max: 99, name: "foxy" },
+  { min: 11, max: 20, name: "oatmilk" },
+  { min: 21, max: 30, name: "andraz" },
+  { min: 31, max: 40, name: "Heibi" },
+  { min: 41, max: 50, name: "atns" },
+  { min: 51, max: 60, name: "Taiyo" },
+  { min: 61, max: 70, name: "Ethereal" },
+  { min: 71, max: 80, name: "cryptopunk" },
+  { min: 81, max: 90, name: "alyx" },
+  { min: 91, max: 99, name: "foxy" },
   { min: 100, max: 100, name: "telcier" }
 ];
 
@@ -165,23 +195,28 @@ startBtn.onclick = () => {
   scanner.style.display = "flex";
 
   let progress = 0;
-  let statusIndex = 0;
+
+  statusEl.innerText =
+    statuses[Math.floor(Math.random() * statuses.length)];
 
   const statusTimer = setInterval(() => {
     statusEl.innerText =
       statuses[Math.floor(Math.random() * statuses.length)];
-  }, 10000);
+  }, 4000);
 
   const progressTimer = setInterval(() => {
-    progress += 10;
+    progress += 1;
     fill.style.height = progress + "%";
 
     if (progress >= 100) {
       clearInterval(progressTimer);
       clearInterval(statusTimer);
-      showResult();
+
+      fill.classList.add("erupt");
+
+      setTimeout(showResult, 600);
     }
-  }, 1000);
+  }, 200);
 };
 
 function showResult() {
@@ -191,7 +226,7 @@ function showResult() {
   document.getElementById("resultPercent").innerText =
     percent + "% GOONER";
   document.getElementById("resultTier").innerText =
-    "Tier: " + tier.name;
+    tier.name;
 
   app.classList.add("blur");
   modal.style.display = "flex";
