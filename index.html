@@ -261,29 +261,71 @@ function saveCard() {
     const W = canvas.width;
     const H = canvas.height;
 
+    const P = 24;        // внутренний отступ карточки
+    const BORDER = 12;   // толщина рамки
+    const IMAGE_SIZE = W - P * 2;
+
+    // ===== BACKGROUND =====
     ctx.fillStyle = "#0a0a0a";
     ctx.fillRect(0, 0, W, H);
 
+    // ===== CARD BORDER (ВНУТРИ) =====
     ctx.strokeStyle = "#e6d3a3";
-    ctx.lineWidth = 12;
-    ctx.strokeRect(6, 6, W - 12, H - 12);
+    ctx.lineWidth = BORDER;
+    ctx.strokeRect(
+      P,
+      P,
+      W - P * 2,
+      H - P * 2
+    );
 
-    drawCover(ctx, img, 0, 0, W, W);
+    // ===== IMAGE (COVER, НЕ ВЫЛЕЗАЕТ) =====
+    drawCover(
+      ctx,
+      img,
+      P,
+      P,
+      IMAGE_SIZE,
+      IMAGE_SIZE
+    );
 
+    // ===== DIVIDER =====
     ctx.fillStyle = "#e6d3a3";
-    ctx.fillRect(0, W, W, 6);
+    ctx.fillRect(
+      P,
+      P + IMAGE_SIZE,
+      IMAGE_SIZE,
+      6
+    );
 
+    // ===== TEXT AREA BG =====
     ctx.fillStyle = "#000";
-    ctx.fillRect(0, W + 6, W, H - W);
+    ctx.fillRect(
+      P,
+      P + IMAGE_SIZE + 6,
+      IMAGE_SIZE,
+      H - (P + IMAGE_SIZE + 6) - P
+    );
 
+    // ===== MAIN TEXT =====
     ctx.font = "110px fontcum";
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = "#ffffff";
     ctx.textAlign = "center";
-    ctx.fillText(`${finalPercent}% GOONER`, W / 2, W + 140);
+    ctx.fillText(
+      `${finalPercent}% GOONER`,
+      W / 2,
+      P + IMAGE_SIZE + 140
+    );
 
+    // ===== TIER TEXT =====
     ctx.font = "48px fontcum";
-    ctx.fillText(`TIER: ${finalTier}`, W / 2, W + 220);
+    ctx.fillText(
+      `TIER: ${finalTier}`,
+      W / 2,
+      P + IMAGE_SIZE + 220
+    );
 
+    // ===== SAVE =====
     const link = document.createElement("a");
     link.download = `${finalPercent}-gooner-${finalTier}.jpg`;
     link.href = canvas.toDataURL("image/jpeg", 0.92);
