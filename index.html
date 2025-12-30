@@ -1,56 +1,201 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Gooner Test</title>
-  <style>
-    body {
-      background: #0d0d0d;
-      color: white;
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .box {
-      background: #1a1a1a;
-      padding: 30px;
-      border-radius: 12px;
-      text-align: center;
-      width: 300px;
-    }
-    button {
-      margin-top: 15px;
-      padding: 12px;
-      width: 100%;
-      border: none;
-      border-radius: 6px;
-      background: #ff0055;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    .result {
-      margin-top: 20px;
-      font-size: 20px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>Gooner Test</title>
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: #fff;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .center {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  button {
+    padding: 14px 28px;
+    font-size: 18px;
+    background: #e6d3a3;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  /* Loader */
+  .scanner {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .bar {
+    width: 40px;
+    height: 300px;
+    background: #e6d3a3;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .fill {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 0%;
+    background: #fff;
+    transition: height 1s linear;
+  }
+
+  .status {
+    font-size: 16px;
+    opacity: 0.8;
+  }
+
+  /* Blur */
+  .blur {
+    filter: blur(8px);
+  }
+
+  /* Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-content {
+    background: #1a1a1a;
+    padding: 30px;
+    border-radius: 16px;
+    text-align: center;
+    width: 320px;
+  }
+
+  .percent {
+    font-size: 42px;
+    margin-bottom: 10px;
+  }
+
+  .tier {
+    opacity: 0.7;
+    margin-bottom: 20px;
+  }
+
+  .share {
+    background: #000;
+    color: #fff;
+    border: 1px solid #333;
+  }
+</style>
 </head>
 <body>
 
-<div class="box">
-  <h2>How much of a gooner are you?</h2>
-  <button onclick="checkGooner()">Check</button>
-  <div class="result" id="result"></div>
+<div id="app" class="center">
+  <button id="startBtn">Start test</button>
+
+  <div class="scanner" id="scanner">
+    <div class="bar">
+      <div class="fill" id="fill"></div>
+    </div>
+    <div class="status" id="status">Initializing scan…</div>
+  </div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <div class="percent" id="resultPercent">0%</div>
+    <div class="tier" id="resultTier"></div>
+    <button class="share">Share on X (image soon)</button>
+  </div>
 </div>
 
 <script>
-  function checkGooner() {
-    const percent = Math.floor(Math.random() * 101);
-    document.getElementById("result").innerText =
-      `You are ${percent}% gooner`;
-  }
+const statuses = [
+  "Touching the spheres",
+  "Massaging the neck",
+  "Reading forbidden thoughts",
+  "Calibrating instincts",
+  "Analyzing browser history",
+  "Checking late-night behavior",
+  "Scanning inner demons",
+  "Cross-referencing urges",
+  "Decrypting private intentions",
+  "Running deep goon heuristics",
+  "Synchronizing dopamine levels",
+  "Measuring moral resistance"
+];
+
+const tiers = [
+  { min: 0, max: 0, name: "wale.moca" },
+  { min: 1, max: 10, name: "banditxbt" },
+  { min: 10, max: 20, name: "oatmilk" },
+  { min: 20, max: 30, name: "andraz" },
+  { min: 30, max: 40, name: "Heibi" },
+  { min: 40, max: 50, name: "atns" },
+  { min: 50, max: 60, name: "Taiyo" },
+  { min: 60, max: 70, name: "Ethereal" },
+  { min: 70, max: 80, name: "cryptopunk" },
+  { min: 80, max: 90, name: "alyx" },
+  { min: 90, max: 99, name: "foxy" },
+  { min: 100, max: 100, name: "telcier" }
+];
+
+const startBtn = document.getElementById("startBtn");
+const scanner = document.getElementById("scanner");
+const fill = document.getElementById("fill");
+const statusEl = document.getElementById("status");
+const modal = document.getElementById("modal");
+const app = document.getElementById("app");
+
+startBtn.onclick = () => {
+  startBtn.style.display = "none";
+  scanner.style.display = "flex";
+
+  let progress = 0;
+  let statusIndex = 0;
+
+  const statusTimer = setInterval(() => {
+    statusEl.innerText =
+      statuses[Math.floor(Math.random() * statuses.length)];
+  }, 10000);
+
+  const progressTimer = setInterval(() => {
+    progress += 10;
+    fill.style.height = progress + "%";
+
+    if (progress >= 100) {
+      clearInterval(progressTimer);
+      clearInterval(statusTimer);
+      showResult();
+    }
+  }, 1000);
+};
+
+function showResult() {
+  const percent = Math.floor(Math.random() * 101);
+  const tier = tiers.find(t => percent >= t.min && percent <= t.max);
+
+  document.getElementById("resultPercent").innerText =
+    percent + "% GOONER";
+  document.getElementById("resultTier").innerText =
+    "Tier: " + tier.name;
+
+  app.classList.add("blur");
+  modal.style.display = "flex";
+}
 </script>
 
 </body>
